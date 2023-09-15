@@ -1807,21 +1807,25 @@ presubmits:
     labels:
       preset-service-account: "true"
       preset-k8s-ssh: "true"
+    annotations:
+      testgrid-dashboards: sig-node-presubmits
+      testgrid-tab-name: pr-crio-cgroupv1-node-e2e-eviction
     optional: true
     always_run: false
     cluster: k8s-infra-prow-build
+    path_alias: k8s.io/kubernetes
+    decorate: true
     max_concurrency: 12
     spec:
       containers:
       - image: gcr.io/k8s-staging-test-infra/kubekins-e2e:v20230727-ea685f8747-master
+        command:
+         runner.sh
         args:
-        - --root=/go/src
-        - --job=$(JOB_NAME)
-        - --repo=k8s.io/$(REPO_NAME)=$(PULL_REFS)
-        - --service-account=/etc/service-account/service-account.json
-        - --upload=gs://kubernetes-jenkins/pr-logs
-        - "--timeout=320"
-        - --scenario=kubernetes_e2e
+        - kubetest2
+        - noop
+        - --test=node
+        - --repo-root=.
         - -- # end bootstrap args, scenario args below
         - --deployment=node
         - --env=KUBE_SSH_USER=core
@@ -1845,9 +1849,8 @@ presubmits:
           limits:
             cpu: 4
             memory: 6Gi
-    annotations:
-      testgrid-dashboards: sig-node-presubmits
-      testgrid-tab-name: pr-crio-cgroupv1-node-e2e-eviction
+        securityContext:
+          privileged: true
   - name: pull-kubernetes-cos-cgroupv1-containerd-node-e2e
     skip_branches:
       - release-\d+\.\d+  # per-release image
