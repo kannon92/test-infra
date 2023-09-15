@@ -1817,7 +1817,9 @@ presubmits:
         args:
         - --root=/go/src
         - --job=$(JOB_NAME)
-        - --repo=k8s.io/kubernetes
+        - --repo=k8s.io/$(REPO_NAME)=$(PULL_REFS)
+        - --service-account=/etc/service-account/service-account.json
+        - --upload=gs://kubernetes-jenkins/pr-logs
         - "--timeout=320"
         - --scenario=kubernetes_e2e
         - -- # end bootstrap args, scenario args below
@@ -1834,6 +1836,8 @@ presubmits:
         env:
         - name: GOPATH
           value: /go
+        - name: IGNITION_INJECT_GCE_SSH_PUBLIC_KEY_FILE
+          value: "1"
         resources:
           requests:
             cpu: 4
